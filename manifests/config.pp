@@ -159,17 +159,17 @@ class dynatraceoneagent::config {
       }
     }
 
-    if $infra_only != undef {
-      file { $oneagent_infraonly_config_file:
-        ensure  => present,
-        content => String($infra_only),
-        mode    => $global_mode,
-      }
-    } else {
-      file { $oneagent_infraonly_config_file:
-        ensure => absent,
-      }
-    }
+    # if $infra_only != undef {
+    #   file { $oneagent_infraonly_config_file:
+    #     ensure  => present,
+    #     content => String($infra_only),
+    #     mode    => $global_mode,
+    #   }
+    # } else {
+    #   file { $oneagent_infraonly_config_file:
+    #     ensure => absent,
+    #   }
+    # }
 
     if $network_zone {
       file { $oneagent_networkzone_config_file:
