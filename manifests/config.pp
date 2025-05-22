@@ -296,16 +296,6 @@ class dynatraceoneagent::config {
         refreshonly => true,
     }
 
-    exec { 'set_infra_only':
-        command     => "${oactl} --set-infra-only=${infra_only} --restart-service",
-        path        => $oneagentctl_exec_path,
-        cwd         => $oneagent_tools_dir,
-        timeout     => 6000,
-        provider    => $provider,
-        logoutput   => on_failure,
-        refreshonly => true,
-    }
-
     exec { 'set_network_zone':
         command     => "${oactl} --set-network-zone=${network_zone} --restart-service",
         path        => $oneagentctl_exec_path,
