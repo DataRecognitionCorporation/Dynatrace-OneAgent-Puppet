@@ -22,7 +22,6 @@ class dynatraceoneagent::params {
 
     # OneAgent Install Parameters
     $oneagent_params_hash = {
-        '--set-infra-only'             => 'false',
         '--set-app-log-content-access' => 'true',
     }
     $reboot_system      = false
