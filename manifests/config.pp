@@ -163,7 +163,6 @@ class dynatraceoneagent::config {
       file { $oneagent_infraonly_config_file:
         ensure  => present,
         content => String($infra_only),
-        notify  => Exec['set_infra_only'],
         mode    => $global_mode,
       }
     } else {
