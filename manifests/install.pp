@@ -23,6 +23,10 @@ class dynatraceoneagent::install {
         provider  => $provider,
         logoutput => on_failure,
     }
+    file { $download_path:
+        ensure    => absent,
+        subscribe => Exec['install_oneagent'],
+    }
   }
 
   if ($::osfamily == 'Windows') {
