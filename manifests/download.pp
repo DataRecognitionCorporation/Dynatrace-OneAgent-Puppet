@@ -34,26 +34,43 @@ class dynatraceoneagent::download {
       ensure => directory
     }
 
-    # use file resource instead of puppet-archive
-    file { $download_path:
-      ensure => present,
-      source => $download_link,
+    if ($::kernel == 'Linux' or $::osfamily  == 'AIX') {
+      exec {'download etag:'
+        command => "curl -sI ${download_link} | grep -i etag | awk '{ print $2; }' | tr -d '\r\"' > ${download_dir}.etag",
+      }
+      match_header = "If-None-Match: \"${download_dir}.etag\""
+    } else {
+      match_header = ''
     }
     
-    # archive{ $filename:
-    #   ensure           => present,
-    #   extract          => false,
-    #   source           => $download_link,
-    #   path             => $download_path,
-    #   allow_insecure   => $allow_insecure,
-    #   require          => File[$download_dir],
-    #   creates          => $created_dir,
-    #   proxy_server     => $proxy_server,
-    #   cleanup          => false,
-    #   download_options => $download_options,
-    #   checksum => 'sha256',
-    #   checksum_url => download_link,
-    # }
+    if $match_header != '' {
+      archive{ $filename:
+        ensure           => present,
+        extract          => false,
+        source           => $download_link,
+        path             => $download_path,
+        allow_insecure   => $allow_insecure,
+        require          => File[$download_dir],
+        creates          => $download_path,
+        proxy_server     => $proxy_server,
+        cleanup          => false,
+        download_options => $download_options,
+      }
+    } else {
+        archive{ $filename:
+          ensure           => present,
+          extract          => false,
+          source           => $download_link,
+          path             => $download_path,
+          allow_insecure   => $allow_insecure,
+          require          => File[$download_dir],
+          creates          => $download_path,
+          proxy_server     => $proxy_server,
+          cleanup          => false,
+          download_options => $download_options,
+          headers          => [$match_header],
+        }
+    }
   }
 
   if ($::kernel == 'Linux' or $::osfamily  == 'AIX') and ($dynatraceoneagent::verify_signature) and ($package_state != 'absent'){
