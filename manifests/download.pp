@@ -34,18 +34,26 @@ class dynatraceoneagent::download {
       ensure => directory
     }
 
-    archive{ $filename:
-      ensure           => present,
-      extract          => false,
-      source           => $download_link,
-      path             => $download_path,
-      allow_insecure   => $allow_insecure,
-      require          => File[$download_dir],
-      creates          => $created_dir,
-      proxy_server     => $proxy_server,
-      cleanup          => false,
-      download_options => $download_options,
+    # use file resource instead of puppet-archive
+    file { $download_path:
+      ensure => present,
+      source => $download_link,
     }
+    
+    # archive{ $filename:
+    #   ensure           => present,
+    #   extract          => false,
+    #   source           => $download_link,
+    #   path             => $download_path,
+    #   allow_insecure   => $allow_insecure,
+    #   require          => File[$download_dir],
+    #   creates          => $created_dir,
+    #   proxy_server     => $proxy_server,
+    #   cleanup          => false,
+    #   download_options => $download_options,
+    #   checksum => 'sha256',
+    #   checksum_url => download_link,
+    # }
   }
 
   if ($::kernel == 'Linux' or $::osfamily  == 'AIX') and ($dynatraceoneagent::verify_signature) and ($package_state != 'absent'){
