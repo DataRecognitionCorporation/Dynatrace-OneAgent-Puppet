@@ -35,15 +35,18 @@ class dynatraceoneagent::download {
     }
 
     if ($::kernel == 'Linux' or $::osfamily  == 'AIX') {
-      exec {'download etag:'
-        command => "curl -sI ${download_link} | grep -i etag | awk '{ print $2; }' | tr -d '\r\"' > ${download_dir}.etag",
+      file { "${download_dir}.etag":
+        ensure => present,
+        source => "curl -sI ${download_link} | grep -i etag | awk '{ print $2; }' | tr -d '\r\"'",
       }
-      match_header = "If-None-Match: \"${download_dir}.etag\""
+      $etag = file("${download_dir}.etag")
+      notify {"Etag = ${etag}"}
+      match_header = "If-None-Match: \"${etag}\""
     } else {
       match_header = ''
     }
     
-    if $match_header != '' {
+    if $match_header == '' {
       archive{ $filename:
         ensure           => present,
         extract          => false,
