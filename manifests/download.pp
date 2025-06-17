@@ -36,6 +36,7 @@ class dynatraceoneagent::download {
 
     $etag_file = "${download_path}.etag"
     notify {"etag filename = ${etag_file}":}
+    notice("etag filename = ${etag_file}")
 
     # if linux and the install script exists on the system
     # if ($::kernel == 'Linux' or $::osfamily  == 'AIX' and file("${download_path}")) {
@@ -53,6 +54,7 @@ class dynatraceoneagent::download {
     if (file_exists($etag_file)) {
       $etag = file($etag_file)
       notify {"Etag = ${etag}":}
+      notice("Etag = ${etag}")
 
       archive{ $filename:
         ensure           => present,
@@ -61,12 +63,12 @@ class dynatraceoneagent::download {
         path             => $download_path,
         allow_insecure   => $allow_insecure,
         require          => File[$download_dir],
-        creates          => $download_path,
+        creates          => $created_dir,
         proxy_server     => $proxy_server,
         cleanup          => false,
         download_options => $download_options,
         headers          => ["If-None-Match: \"${file($etag_file)}\""],
-        notify           => File[$etag_file],
+        notify           => File[ $etag_file ],
       }
     } else {
       archive{ $filename:
@@ -76,11 +78,11 @@ class dynatraceoneagent::download {
         path             => $download_path,
         allow_insecure   => $allow_insecure,
         require          => File[$download_dir],
-        creates          => $download_path,
+        creates          => $created_dir,
         proxy_server     => $proxy_server,
         cleanup          => false,
         download_options => $download_options,
-        notify           => File[$etag_file],
+        notify           => File[ $etag_file ],
       }
     }
 
