@@ -35,6 +35,7 @@ class dynatraceoneagent::download {
     }
 
     $etag_file = "${download_path}.etag"
+    notify {"etag filename = ${etag_file}":}
 
     # if linux and the install script exists on the system
     # if ($::kernel == 'Linux' or $::osfamily  == 'AIX' and file("${download_path}")) {
@@ -48,16 +49,10 @@ class dynatraceoneagent::download {
     # } else {
     #   match_header = ''
     # }
-    
-    file { $etag_file:
-      ensure    => present,
-      source    => "curl -sI ${download_link} | grep -i etag | awk '{ print $2; }' | tr -d '\r\"'",
-      subscribe => Archive[$filename],
-    }
 
     if (file_exists($etag_file)) {
       $etag = file($etag_file)
-      notify {"Etag = ${etag}"}
+      notify {"Etag = ${etag}":}
 
       archive{ $filename:
         ensure           => present,
@@ -71,6 +66,7 @@ class dynatraceoneagent::download {
         cleanup          => false,
         download_options => $download_options,
         headers          => ["If-None-Match: \"${file($etag_file)}\""],
+        notify           => File[$etag_file],
       }
     } else {
       archive{ $filename:
@@ -84,7 +80,13 @@ class dynatraceoneagent::download {
         proxy_server     => $proxy_server,
         cleanup          => false,
         download_options => $download_options,
+        notify           => File[$etag_file],
       }
+    }
+
+    file { $etag_file:
+      ensure    => present,
+      source    => "curl -sI ${download_link} | grep -i etag | awk '{ print $2; }' | tr -d '\r\"'",
     }
 
     # if $match_header == '' {
