@@ -90,7 +90,8 @@ class dynatraceoneagent::download {
     file { 'Create_etag_file':
       path      => $etag_file,
       ensure    => present,
-      source    => "curl -sI ${etag_link} | grep -i etag | awk '{ print \$2; }' | tr -d '\r\"'",
+      source    => $etag_link,
+      require   => Archive[ $filename ],
     }
 
     # if $match_header == '' {
