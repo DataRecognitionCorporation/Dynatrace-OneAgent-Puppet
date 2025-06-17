@@ -39,9 +39,11 @@ class dynatraceoneagent::download {
     if ($facts['dynatrace_oneagent_etag'] != '') {
       $etag = $facts['dynatrace_oneagent_etag']
       notice("Etag = ${etag}")
-      $header = "'If-None-Match: \"${etag}\"'"
+      $headers = [
+        "If-None-Match: ${etag}"
+      ] 
 
-      archive::download{ $filename:
+      archive{ $filename:
         ensure           => present,
         extract          => false,
         source           => $download_link,
@@ -52,8 +54,7 @@ class dynatraceoneagent::download {
         proxy_server     => $proxy_server,
         cleanup          => false,
         download_options => $download_options,
-        provider         => 'curl',
-        headers          => [$header],
+        headers          => $headers,
         notify           => Exec['Create_etag_file'],
       }
     } else {
