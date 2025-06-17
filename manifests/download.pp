@@ -34,19 +34,45 @@ class dynatraceoneagent::download {
       ensure => directory
     }
 
-    if ($::kernel == 'Linux' or $::osfamily  == 'AIX') {
-      file { "${download_dir}.etag":
-        ensure => present,
-        source => "curl -sI ${download_link} | grep -i etag | awk '{ print $2; }' | tr -d '\r\"'",
-      }
-      $etag = file("${download_dir}.etag")
-      notify {"Etag = ${etag}"}
-      match_header = "If-None-Match: \"${etag}\""
-    } else {
-      match_header = ''
-    }
+    $etag_file = "${download_path}.etag"
+
+    # if linux and the install script exists on the system
+    # if ($::kernel == 'Linux' or $::osfamily  == 'AIX' and file("${download_path}")) {
+    #   file { $etag_file:
+    #     ensure => present,
+    #     source => "curl -sI ${download_link} | grep -i etag | awk '{ print $2; }' | tr -d '\r\"'",
+    #   }
+    #   $etag = file("${download_path}.etag")
+    #   notify {"Etag = ${etag}"}
+    #   match_header = "If-None-Match: \"${etag}\""
+    # } else {
+    #   match_header = ''
+    # }
     
-    if $match_header == '' {
+    file { $etag_file:
+      ensure    => present,
+      source    => "curl -sI ${download_link} | grep -i etag | awk '{ print $2; }' | tr -d '\r\"'",
+      subscribe => Archive[$filename],
+    }
+
+    if (file_exists($etag_file)) {
+      $etag = file($etag_file)
+      notify {"Etag = ${etag}"}
+
+      archive{ $filename:
+        ensure           => present,
+        extract          => false,
+        source           => $download_link,
+        path             => $download_path,
+        allow_insecure   => $allow_insecure,
+        require          => File[$download_dir],
+        creates          => $download_path,
+        proxy_server     => $proxy_server,
+        cleanup          => false,
+        download_options => $download_options,
+        headers          => ["If-None-Match: \"${file($etag_file)}\""],
+      }
+    } else {
       archive{ $filename:
         ensure           => present,
         extract          => false,
@@ -59,21 +85,37 @@ class dynatraceoneagent::download {
         cleanup          => false,
         download_options => $download_options,
       }
-    } else {
-        archive{ $filename:
-          ensure           => present,
-          extract          => false,
-          source           => $download_link,
-          path             => $download_path,
-          allow_insecure   => $allow_insecure,
-          require          => File[$download_dir],
-          creates          => $download_path,
-          proxy_server     => $proxy_server,
-          cleanup          => false,
-          download_options => $download_options,
-          headers          => [$match_header],
-        }
     }
+
+    # if $match_header == '' {
+    #   archive{ $filename:
+    #     ensure           => present,
+    #     extract          => false,
+    #     source           => $download_link,
+    #     path             => $download_path,
+    #     allow_insecure   => $allow_insecure,
+    #     require          => File[$download_dir],
+    #     creates          => $download_path,
+    #     proxy_server     => $proxy_server,
+    #     cleanup          => false,
+    #     download_options => $download_options,
+    #   }
+    # } else {
+    #     archive{ $filename:
+    #       ensure           => present,
+    #       extract          => false,
+    #       source           => $download_link,
+    #       path             => $download_path,
+    #       allow_insecure   => $allow_insecure,
+    #       require          => File[$download_dir],
+    #       creates          => $download_path,
+    #       proxy_server     => $proxy_server,
+    #       cleanup          => false,
+    #       download_options => $download_options,
+    #       headers          => [$match_header],
+    #       notify           => File[]
+    #     }
+    # }
   }
 
   if ($::kernel == 'Linux' or $::osfamily  == 'AIX') and ($dynatraceoneagent::verify_signature) and ($package_state != 'absent'){
