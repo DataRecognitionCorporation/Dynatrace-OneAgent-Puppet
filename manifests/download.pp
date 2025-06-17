@@ -41,7 +41,7 @@ class dynatraceoneagent::download {
       notice("Etag = ${etag}")
       $header = "'If-None-Match: \"${etag}\"'"
 
-      archive{ $filename:
+      archive::download{ $filename:
         ensure           => present,
         extract          => false,
         source           => $download_link,
