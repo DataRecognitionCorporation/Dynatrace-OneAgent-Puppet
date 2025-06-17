@@ -68,7 +68,7 @@ class dynatraceoneagent::download {
         cleanup          => false,
         download_options => $download_options,
         headers          => ["If-None-Match: \"${file($etag_file)}\""],
-        notify           => File[ 'Create_etag_file' ],
+        notify           => File[$etag_file],
       }
     } else {
       archive{ $filename:
@@ -82,7 +82,7 @@ class dynatraceoneagent::download {
         proxy_server     => $proxy_server,
         cleanup          => false,
         download_options => $download_options,
-        notify           => File[ 'Create_etag_file' ],
+        notify           => File[$etag_file],
       }
     }
 
