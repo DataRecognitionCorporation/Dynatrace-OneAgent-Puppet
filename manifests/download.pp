@@ -51,7 +51,7 @@ class dynatraceoneagent::download {
     #   match_header = ''
     # }
 
-    if (file_exists($etag_file)) {
+    if (find_file($etag_file)) {
       $etag = file($etag_file)
       notify {"Etag = ${etag}":}
       notice("Etag = ${etag}")
