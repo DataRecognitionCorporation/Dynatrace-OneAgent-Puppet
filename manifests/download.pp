@@ -52,7 +52,7 @@ class dynatraceoneagent::download {
         proxy_server     => $proxy_server,
         cleanup          => false,
         download_options => $download_options,
-        headers          => ["If-None-Match: \"${etag)}\""],
+        headers          => ["If-None-Match: \"${etag}\""],
         notify           => Exec['Create_etag_file'],
       }
     } else {
