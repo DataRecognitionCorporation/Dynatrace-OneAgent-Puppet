@@ -173,7 +173,7 @@ class dynatraceoneagent (
 
     if $version == 'latest' {
       $download_link  = "${tenant_url}${api_path}${os_type}/${installer_type}/latest/?Api-Token=${paas_token}&arch=${arch}"
-      $etag_link      = "curl -sI -H 'Authorization: Api-Token ${paas_token}' ${tenant_url}${api_path}${os_type}/${installer_type}/latest/?arch=${arch} | grep -i etag | awk '{ print \$2; }' | tr -d '\r\"'",
+      $etag_link      = "curl -sI -H 'Authorization: Api-Token ${paas_token}' ${tenant_url}${api_path}${os_type}/${installer_type}/latest/?arch=${arch} | grep -i etag | awk '{ print \$2; }' | tr -d '\r\"'"
     } else {
       $download_link  = "${tenant_url}${api_path}${os_type}/${installer_type}/version/${version}?Api-Token=${paas_token}&arch=${arch}"
     }
