@@ -17,6 +17,7 @@ class dynatraceoneagent::download {
   $allow_insecure           = $dynatraceoneagent::allow_insecure
   $download_options         = $dynatraceoneagent::download_options
   $download_link            = $dynatraceoneagent::download_link
+  $etag_link                = $dynatraceoneagent::etag_link
   $download_cert_link       = $dynatraceoneagent::download_cert_link
   $cert_file_name           = $dynatraceoneagent::cert_file_name
   $ca_cert_src_path         = $dynatraceoneagent::ca_cert_src_path
