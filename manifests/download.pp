@@ -74,6 +74,7 @@ class dynatraceoneagent::download {
       command     => "/usr/bin/curl -sI ${etag_link} | grep -i etag | awk '{ print \$2; }' | tr -d '\r\"' > ${etag_file}",
       path        => ['/usr/bin', '/bin'],
       refreshonly => true,
+      require     => Exec[$filename],
     }
   }
 
