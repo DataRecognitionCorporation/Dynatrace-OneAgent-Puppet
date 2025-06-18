@@ -38,6 +38,7 @@ class dynatraceoneagent::download {
     $etag_file = "${download_path}.etag"
     $etag = $facts['dynatrace_oneagent_etag']
     notice("Etag = ${etag}")
+    notify{"Etag = ${etag}":}
 
     # if (! $facts['dynatrace_oneagent_etag']) {
     #   notice("no etag file")
