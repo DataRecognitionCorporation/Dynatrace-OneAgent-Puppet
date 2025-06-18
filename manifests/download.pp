@@ -47,7 +47,7 @@ class dynatraceoneagent::download {
       $headers = []
     }
 
-    archive{ $filename:
+    archive { $filename:
       ensure           => present,
       extract          => false,
       source           => $download_link,
@@ -55,6 +55,7 @@ class dynatraceoneagent::download {
       allow_insecure   => $allow_insecure,
       require          => File[$download_dir],
       creates          => $created_dir,
+      provider         => 'curl',
       proxy_server     => $proxy_server,
       cleanup          => false,
       download_options => $download_options,
