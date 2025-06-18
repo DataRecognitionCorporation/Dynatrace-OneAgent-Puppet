@@ -3,11 +3,11 @@
 #
 class dynatraceoneagent::download {
 
-  # if !defined('archive') {
-  #   class { 'archive':
-  #     seven_zip_provider => '',
-  #   }
-  # }
+  if !defined('archive') {
+    class { 'archive':
+      seven_zip_provider => '',
+    }
+  }
 
   $created_dir              = $dynatraceoneagent::created_dir
   $download_dir             = $dynatraceoneagent::download_dir
@@ -64,7 +64,7 @@ class dynatraceoneagent::download {
     # }
 
     # Download file if ETag changed
-    exec { 'download_file':
+    exec { $filename:
       command =>  "/usr/bin/curl -s -H ${headers} -o ${download_path} ${download_link}",
       path    => ['/usr/bin', '/bin'],
       notify  => Exec['Create_etag_file'],
@@ -99,7 +99,7 @@ class dynatraceoneagent::download {
         unless    => $verify_signature_command,
         require   => [
             File[$dynatraceoneagent::dt_root_cert],
-            Archive[$filename],
+            Exec[$filename],
         ],
         creates   => $created_dir,
     }
