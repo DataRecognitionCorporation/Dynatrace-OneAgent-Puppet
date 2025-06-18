@@ -46,35 +46,35 @@ class dynatraceoneagent::download {
     } else {
       $headers = []
     }
+    notice("headers = ${headers}")
 
-    # archive { $filename:
-    #   ensure           => present,
-    #   extract          => false,
-    #   source           => $download_link,
-    #   path             => $download_path,
-    #   allow_insecure   => $allow_insecure,
-    #   require          => File[$download_dir],
-    #   creates          => $created_dir,
-    #   provider         => 'curl',
-    #   proxy_server     => $proxy_server,
-    #   cleanup          => false,
-    #   download_options => $download_options,
-    #   headers          => $headers,
-    #   notify           => Exec['Create_etag_file'],
-    # }
+    archive { $filename:
+      ensure           => present,
+      extract          => false,
+      source           => $download_link,
+      path             => $download_path,
+      allow_insecure   => $allow_insecure,
+      require          => File[$download_dir],
+      creates          => $created_dir,
+      provider         => 'curl',
+      proxy_server     => $proxy_server,
+      cleanup          => false,
+      download_options => $download_options,
+      headers          => $headers,
+      notify           => Exec['Create_etag_file'],
+    }
 
     # Download file if ETag changed
-    exec { $filename:
-      command =>  "/usr/bin/curl -s -H ${headers} ${download_link} -o ${download_path}",
-      path    => ['/usr/bin', '/bin'],
-      notify  => Exec['Create_etag_file'],
-    }
+    # exec { $filename:
+    #   command =>  "/usr/bin/curl -s -H ${headers} ${download_link} -o ${download_path}",
+    #   path    => ['/usr/bin', '/bin'],
+    #   notify  => Exec['Create_etag_file'],
+    # }
 
     exec { 'Create_etag_file':
       command     => "/usr/bin/curl -sI ${etag_link} | grep -i etag | awk '{ print \$2; }' | tr -d '\r\"' > ${etag_file}",
       path        => ['/usr/bin', '/bin'],
       refreshonly => true,
-      require     => Exec[$filename],
     }
   }
 
@@ -100,7 +100,7 @@ class dynatraceoneagent::download {
         unless    => $verify_signature_command,
         require   => [
             File[$dynatraceoneagent::dt_root_cert],
-            Exec[$filename],
+            Archive[$filename],
         ],
         creates   => $created_dir,
     }
