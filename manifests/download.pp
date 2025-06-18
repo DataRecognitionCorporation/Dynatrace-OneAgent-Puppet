@@ -39,13 +39,19 @@ class dynatraceoneagent::download {
     $etag = $facts['dynatrace_oneagent_etag']
     notice("Etag = ${etag}")
 
-    if (! $facts['dynatrace_oneagent_etag']) {
-      notice("no etag file")
-      exec {'touch file':
-        command => "/usr/bin/touch ${etag_file}",
-        path    => ['/usr/bin', '/bin'],
-        creates => $etag_file,
-      }
+    # if (! $facts['dynatrace_oneagent_etag']) {
+    #   notice("no etag file")
+    #   exec {'touch file':
+    #     command => "/usr/bin/touch ${etag_file}",
+    #     path    => ['/usr/bin', '/bin'],
+    #     creates => $etag_file,
+    #   }
+    # }
+
+    if ($facts['dynatrace_oneagent_etag'] != '') {
+      $headers = "-H 'If-None-Match: ${etag}'"
+    } else {
+      $headers = ""
     }
 
     # archive { $filename:
@@ -65,17 +71,23 @@ class dynatraceoneagent::download {
     # }
 
     # Fetch current ETag
-    exec { 'get_current_etag':
-      command => "/usr/bin/curl -sI ${etag_link} | grep -i etag | awk '{ print \$2; }' | tr -d '\r\"' > /tmp/current.etag",
-      path    => ['/usr/bin', '/bin'],
-    }
+    # exec { 'get_current_etag':
+    #   command => "/usr/bin/curl -sI ${etag_link} | grep -i etag | awk '{ print \$2; }' | tr -d '\r\"' > /tmp/current.etag",
+    #   path    => ['/usr/bin', '/bin'],
+    # }
 
     # Download file if ETag changed
+    # exec { $filename:
+    #   command     =>  "/usr/bin/curl -s ${download_link} -o ${download_path}",
+    #   path        => ['/usr/bin', '/bin'],
+    #   unless      => "/usr/bin/diff -q /tmp/current.etag ${etag_file}",
+    #   require     => Exec['get_current_etag'],
+    #   notify      => Exec['Create_etag_file'],
+    # }
+
     exec { $filename:
-      command     =>  "/usr/bin/curl -s ${download_link} -o ${download_path}",
+      command     =>  "/usr/bin/curl -s ${headers} ${download_link} -o ${download_path}",
       path        => ['/usr/bin', '/bin'],
-      unless      => "/usr/bin/diff -q /tmp/current.etag ${etag_file}",
-      require     => Exec['get_current_etag'],
       notify      => Exec['Create_etag_file'],
     }
 
