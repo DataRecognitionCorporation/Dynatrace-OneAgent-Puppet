@@ -34,43 +34,32 @@ class dynatraceoneagent::download {
     file{ $download_dir:
       ensure => directory
     }
+    
     $etag_file = "${download_path}.etag"
+    $etag = $facts['dynatrace_oneagent_etag']
+    notice("Etag = ${etag}")
 
     if ($facts['dynatrace_oneagent_etag'] != '') {
-      $etag = $facts['dynatrace_oneagent_etag']
-      notice("Etag = ${etag}")
       $headers = [
         "If-None-Match: ${etag}"
-      ] 
-
-      archive{ $filename:
-        ensure           => present,
-        extract          => false,
-        source           => $download_link,
-        path             => $download_path,
-        allow_insecure   => $allow_insecure,
-        require          => File[$download_dir],
-        creates          => $created_dir,
-        proxy_server     => $proxy_server,
-        cleanup          => false,
-        download_options => $download_options,
-        headers          => $headers,
-        notify           => Exec['Create_etag_file'],
-      }
+      ]
     } else {
-      archive{ $filename:
-        ensure           => present,
-        extract          => false,
-        source           => $download_link,
-        path             => $download_path,
-        allow_insecure   => $allow_insecure,
-        require          => File[$download_dir],
-        creates          => $created_dir,
-        proxy_server     => $proxy_server,
-        cleanup          => false,
-        download_options => $download_options,
-        notify           => Exec['Create_etag_file'],
-      }
+      $headers = []
+    }
+
+    archive{ $filename:
+      ensure           => present,
+      extract          => false,
+      source           => $download_link,
+      path             => $download_path,
+      allow_insecure   => $allow_insecure,
+      require          => File[$download_dir],
+      creates          => $created_dir,
+      proxy_server     => $proxy_server,
+      cleanup          => false,
+      download_options => $download_options,
+      headers          => $headers,
+      notify           => Exec['Create_etag_file'],
     }
 
     exec { 'Create_etag_file':
