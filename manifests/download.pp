@@ -54,6 +54,9 @@ class dynatraceoneagent::download {
       $headers = ""
     }
 
+    notice("header = ${headers}")
+    notify{"header = ${headers}":}
+
     # archive { $filename:
     #   ensure           => present,
     #   extract          => false,
