@@ -44,6 +44,7 @@ class dynatraceoneagent::download {
       exec {'touch file':
         command => "/usr/bin/touch ${etag_file}",
         path    => ['/usr/bin', '/bin'],
+        creates => $etag_file,
       }
     }
 
