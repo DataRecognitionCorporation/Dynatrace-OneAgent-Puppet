@@ -39,37 +39,44 @@ class dynatraceoneagent::download {
     $etag = $facts['dynatrace_oneagent_etag']
     notice("Etag = ${etag}")
 
-    if ($facts['dynatrace_oneagent_etag']) {
-      $headers = [
-        "If-None-Match: ${etag}"
-      ]
-    } else {
-      $headers = []
+    if (! $facts['dynatrace_oneagent_etag']) {
+      notice("no etag file")
+      exec {'touch file':
+        command => "/usr/bin/touch ${etag_file}",
+        path    => ['/usr/bin', '/bin'],
+      }
     }
-    notice("headers = ${headers}")
 
-    archive { $filename:
-      ensure           => present,
-      extract          => false,
-      source           => $download_link,
-      path             => $download_path,
-      allow_insecure   => $allow_insecure,
-      require          => File[$download_dir],
-      creates          => $created_dir,
-      provider         => 'curl',
-      proxy_server     => $proxy_server,
-      cleanup          => false,
-      download_options => $download_options,
-      headers          => $headers,
-      notify           => Exec['Create_etag_file'],
+    # archive { $filename:
+    #   ensure           => present,
+    #   extract          => false,
+    #   source           => $download_link,
+    #   path             => $download_path,
+    #   allow_insecure   => $allow_insecure,
+    #   require          => File[$download_dir],
+    #   creates          => $created_dir,
+    #   provider         => 'curl',
+    #   proxy_server     => $proxy_server,
+    #   cleanup          => false,
+    #   download_options => $download_options,
+    #   headers          => $headers,
+    #   notify           => Exec['Create_etag_file'],
+    # }
+
+    # Fetch current ETag
+    exec { 'get_current_etag':
+      command => "/usr/bin/curl -sI ${etag_link} | grep -i etag | awk '{ print \$2; }' | tr -d '\r\"' > /tmp/current.etag'",
+      path    => ['/usr/bin', '/bin'],
     }
 
     # Download file if ETag changed
-    # exec { $filename:
-    #   command =>  "/usr/bin/curl -s -H ${headers} ${download_link} -o ${download_path}",
-    #   path    => ['/usr/bin', '/bin'],
-    #   notify  => Exec['Create_etag_file'],
-    # }
+    exec { $filename:
+      command     =>  "/usr/bin/curl -s ${download_link} -o ${download_path}",
+      path        => ['/usr/bin', '/bin'],
+      onlyif      => "/usr/bin/diff -q /tmp/current.etag ${etag_file}",
+      require     => Exec['get_current_etag'],
+      notify      => Exec['Create_etag_file'],
+    }
 
     exec { 'Create_etag_file':
       command     => "/usr/bin/curl -sI ${etag_link} | grep -i etag | awk '{ print \$2; }' | tr -d '\r\"' > ${etag_file}",
@@ -100,7 +107,7 @@ class dynatraceoneagent::download {
         unless    => $verify_signature_command,
         require   => [
             File[$dynatraceoneagent::dt_root_cert],
-            Archive[$filename],
+            Exec[$filename],
         ],
         creates   => $created_dir,
     }
