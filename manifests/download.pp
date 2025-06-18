@@ -65,7 +65,7 @@ class dynatraceoneagent::download {
 
     # Fetch current ETag
     exec { 'get_current_etag':
-      command => "/usr/bin/curl -sI ${etag_link} | grep -i etag | awk '{ print \$2; }' | tr -d '\r\"' > /tmp/current.etag'",
+      command => "/usr/bin/curl -sI ${etag_link} | grep -i etag | awk '{ print \$2; }' | tr -d '\r\"' > /tmp/current.etag",
       path    => ['/usr/bin', '/bin'],
     }
 
