@@ -65,7 +65,7 @@ class dynatraceoneagent::download {
 
     # Download file if ETag changed
     exec { $filename:
-      command =>  "/usr/bin/curl -s -H ${headers} -o ${download_path} ${download_link}",
+      command =>  "/usr/bin/curl -s -H ${headers} ${download_link} -o ${download_path}",
       path    => ['/usr/bin', '/bin'],
       notify  => Exec['Create_etag_file'],
     }
