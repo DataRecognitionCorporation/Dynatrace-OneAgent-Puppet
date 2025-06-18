@@ -47,20 +47,27 @@ class dynatraceoneagent::download {
       $headers = []
     }
 
-    archive { $filename:
-      ensure           => present,
-      extract          => false,
-      source           => $download_link,
-      path             => $download_path,
-      allow_insecure   => $allow_insecure,
-      require          => File[$download_dir],
-      creates          => $created_dir,
-      provider         => 'curl',
-      proxy_server     => $proxy_server,
-      cleanup          => false,
-      download_options => $download_options,
-      headers          => $headers,
-      notify           => Exec['Create_etag_file'],
+    # archive { $filename:
+    #   ensure           => present,
+    #   extract          => false,
+    #   source           => $download_link,
+    #   path             => $download_path,
+    #   allow_insecure   => $allow_insecure,
+    #   require          => File[$download_dir],
+    #   creates          => $created_dir,
+    #   provider         => 'curl',
+    #   proxy_server     => $proxy_server,
+    #   cleanup          => false,
+    #   download_options => $download_options,
+    #   headers          => $headers,
+    #   notify           => Exec['Create_etag_file'],
+    # }
+
+    # Download file if ETag changed
+    exec { 'download_file':
+      command =>  "/usr/bin/curl -s -H ${headers} -o ${download_path} ${download_link}",
+      path    => ['/usr/bin', '/bin'],
+      notify  => Exec['Create_etag_file'],
     }
 
     exec { 'Create_etag_file':
