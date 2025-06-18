@@ -39,7 +39,7 @@ class dynatraceoneagent::download {
     $etag = $facts['dynatrace_oneagent_etag']
     notice("Etag = ${etag}")
 
-    if ($facts['dynatrace_oneagent_etag'] != '') {
+    if ($facts['dynatrace_oneagent_etag']) {
       $headers = [
         "If-None-Match: ${etag}"
       ]
