@@ -74,7 +74,7 @@ class dynatraceoneagent::download {
     exec { $filename:
       command     =>  "/usr/bin/curl -s ${download_link} -o ${download_path}",
       path        => ['/usr/bin', '/bin'],
-      onlyif      => "/usr/bin/diff -q /tmp/current.etag ${etag_file}",
+      unless      => "/usr/bin/diff -q /tmp/current.etag ${etag_file}",
       require     => Exec['get_current_etag'],
       notify      => Exec['Create_etag_file'],
     }
