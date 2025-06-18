@@ -92,7 +92,7 @@ class dynatraceoneagent::download {
     }
 
     exec { 'Create_etag_file':
-      command     => "/usr/bin/curl -sI ${etag_link} | grep -i etag | awk '{ print \$2; }' | tr -d '\r\"' > ${etag_file}",
+      command     => "/usr/bin/curl -sI ${headers} ${etag_link} | grep -i etag | awk '{ print \$2; }' | tr -d '\r\"' > ${etag_file}",
       path        => ['/usr/bin', '/bin'],
       refreshonly => true,
     }
