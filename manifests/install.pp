@@ -6,6 +6,7 @@ class dynatraceoneagent::install {
   $created_dir              = $dynatraceoneagent::created_dir
   $download_dir             = $dynatraceoneagent::download_dir
   $install_dir              = $dynatraceoneagent::install_dir
+  $version_link             = $dynatraceoneagent::version_link
   $filename                 = $dynatraceoneagent::filename
   $download_path            = $dynatraceoneagent::download_path
   $provider                 = $dynatraceoneagent::provider
