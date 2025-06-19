@@ -35,7 +35,7 @@ class dynatraceoneagent::download {
       ensure => directory
     }
     
-    # $etag_file = "${download_path}.etag"
+    $etag_file = "${download_path}.etag"
     # $etag = $facts['dynatrace_oneagent_etag']
     # notice("Etag = ${etag}")
     # notify{"Etag = ${etag}":}
