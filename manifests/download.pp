@@ -35,10 +35,10 @@ class dynatraceoneagent::download {
       ensure => directory
     }
     
-    $etag_file = "${download_path}.etag"
-    $etag = $facts['dynatrace_oneagent_etag']
-    notice("Etag = ${etag}")
-    notify{"Etag = ${etag}":}
+    # $etag_file = "${download_path}.etag"
+    # $etag = $facts['dynatrace_oneagent_etag']
+    # notice("Etag = ${etag}")
+    # notify{"Etag = ${etag}":}
 
     # if (! $facts['dynatrace_oneagent_etag']) {
     #   notice("no etag file")
@@ -49,14 +49,14 @@ class dynatraceoneagent::download {
     #   }
     # }
 
-    if ($facts['dynatrace_oneagent_etag'] != '') {
-      $headers = "-H 'If-None-Match: ${etag}'"
-    } else {
-      $headers = ""
-    }
+    # if ($facts['dynatrace_oneagent_etag'] != '') {
+    #   $headers = "-H 'If-None-Match: ${etag}'"
+    # } else {
+    #   $headers = ""
+    # }
 
-    notice("header = ${headers}")
-    notify{"header = ${headers}":}
+    # notice("header = ${headers}")
+    # notify{"header = ${headers}":}
 
     # archive { $filename:
     #   ensure           => present,
@@ -74,29 +74,37 @@ class dynatraceoneagent::download {
     #   notify           => Exec['Create_etag_file'],
     # }
 
+    exec {"touch ${etag_file}":
+      command => "touch ${etag_file}",
+      path    => ['/usr/bin', '/bin'],
+      unless  => "test -e ${etag_file}",
+      creates => $etag_file,
+    }
+
     # Fetch current ETag
-    # exec { 'get_current_etag':
-    #   command => "/usr/bin/curl -sI ${etag_link} | grep -i etag | awk '{ print \$2; }' | tr -d '\r\"' > /tmp/current.etag",
-    #   path    => ['/usr/bin', '/bin'],
-    # }
+    exec { 'get_current_etag':
+      command => "curl -sI ${etag_link} | grep -i etag | awk '{ print \$2; }' | tr -d '\r\"' > /tmp/current.etag",
+      path    => ['/usr/bin', '/bin'],
+    }
 
     # Download file if ETag changed
-    # exec { $filename:
-    #   command     =>  "/usr/bin/curl -s ${download_link} -o ${download_path}",
-    #   path        => ['/usr/bin', '/bin'],
-    #   unless      => "/usr/bin/diff -q /tmp/current.etag ${etag_file}",
-    #   require     => Exec['get_current_etag'],
-    #   notify      => Exec['Create_etag_file'],
-    # }
-
     exec { $filename:
-      command     =>  "/usr/bin/curl -s ${headers} ${download_link} -o ${download_path}",
+      command     =>  "curl -s ${download_link} -o ${download_path}",
       path        => ['/usr/bin', '/bin'],
+      unless      => "diff -q /tmp/current.etag ${etag_file}",
+      require     => Exec['get_current_etag'],
       notify      => Exec['Create_etag_file'],
     }
 
+    # exec { $filename:
+    #   command     =>  "/usr/bin/curl -s ${headers} ${download_link} -o ${download_path}",
+    #   path        => ['/usr/bin', '/bin'],
+    #   notify      => Exec['Create_etag_file'],
+    # }
+
     exec { 'Create_etag_file':
-      command     => "/usr/bin/curl -sI ${headers} ${etag_link} | grep -i etag | awk '{ print \$2; }' | tr -d '\r\"' > ${etag_file}",
+      # command     => "/usr/bin/curl -sI ${headers} ${etag_link} | grep -i etag | awk '{ print \$2; }' | tr -d '\r\"' > ${etag_file}",
+      command     => "cp /tmp/current.etag ${etag_file}",
       path        => ['/usr/bin', '/bin'],
       refreshonly => true,
     }
