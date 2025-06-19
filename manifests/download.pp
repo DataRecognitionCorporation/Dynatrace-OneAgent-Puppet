@@ -34,17 +34,48 @@ class dynatraceoneagent::download {
       ensure => directory
     }
 
-    archive{ $filename:
-      ensure           => present,
-      extract          => false,
-      source           => $download_link,
-      path             => $download_path,
-      allow_insecure   => $allow_insecure,
-      require          => File[$download_dir],
-      creates          => $created_dir,
-      proxy_server     => $proxy_server,
-      cleanup          => false,
-      download_options => $download_options,
+    if ($::kernel == 'Linux' or $::osfamily  == 'AIX') {
+      $etag_file = "${download_path}.etag"
+      exec {"touch ${etag_file}":
+        command => "touch ${etag_file}",
+        path    => ['/usr/bin', '/bin'],
+        unless  => "test -e ${etag_file}",
+        creates => $etag_file,
+      }
+
+      # Fetch current ETag
+      exec { 'get_current_etag':
+        command => "curl -sI ${download_link} | grep -i etag | awk '{ print \$2; }' | tr -d '\r\"' > /tmp/current.etag",
+        path    => ['/usr/bin', '/bin'],
+      }
+
+      # Download file if ETag changed
+      exec { $filename:
+        command     =>  "curl -s ${download_link} -o ${download_path}",
+        path        => ['/usr/bin', '/bin'],
+        unless      => "diff -q /tmp/current.etag ${etag_file}",
+        require     => Exec['get_current_etag'],
+        notify      => Exec['Create_etag_file'],
+      }
+
+      exec { 'Create_etag_file':
+        command     => "cp /tmp/current.etag ${etag_file}",
+        path        => ['/usr/bin', '/bin'],
+        refreshonly => true,
+      }
+    } else {
+      archive{ $filename:
+        ensure           => present,
+        extract          => false,
+        source           => $download_link,
+        path             => $download_path,
+        allow_insecure   => $allow_insecure,
+        require          => File[$download_dir],
+        creates          => $created_dir,
+        proxy_server     => $proxy_server,
+        cleanup          => false,
+        download_options => $download_options,
+      }
     }
   }
 

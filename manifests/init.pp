@@ -172,7 +172,11 @@ class dynatraceoneagent (
     }
 
     if $version == 'latest' {
-      $download_link  = "${tenant_url}${api_path}${os_type}/${installer_type}/latest/?Api-Token=${paas_token}&arch=${arch}"
+      if ($::kernel == 'Linux') or ($::osfamily  == 'AIX') {
+        $download_link =  "-H 'Authorization: Api-Token ${paas_token}' ${tenant_url}${api_path}${os_type}/${installer_type}/latest/?arch=${arch}"
+      } else {
+        $download_link = "${tenant_url}${api_path}${os_type}/${installer_type}/latest/?Api-Token=${paas_token}&arch=${arch}"
+      }
     } else {
       $download_link  = "${tenant_url}${api_path}${os_type}/${installer_type}/version/${version}?Api-Token=${paas_token}&arch=${arch}"
     }
