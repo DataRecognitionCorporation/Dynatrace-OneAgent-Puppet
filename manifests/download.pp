@@ -34,8 +34,7 @@ class dynatraceoneagent::download {
       ensure => directory
     }
 
-    notice("Hello there")
-    notify{"Hello world":}
+    notify{"Hello world 2":}
 
     if ($::kernel == 'Linux' or $::osfamily  == 'AIX') {
       $etag_file = "${download_path}.etag"
