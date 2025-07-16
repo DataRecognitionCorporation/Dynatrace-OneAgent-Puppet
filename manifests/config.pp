@@ -23,7 +23,7 @@ class dynatraceoneagent::config {
   $host_tags                           = $dynatraceoneagent::host_tags
   $host_metadata                       = $dynatraceoneagent::host_metadata
   $hostname                            = $dynatraceoneagent::hostname
-  $infra_only                          = $dynatraceoneagent::infra_only
+  $monitoring_mode                     = $dynatraceoneagent::monitoring_mode
   $network_zone                        = $dynatraceoneagent::network_zone
   $oneagent_puppet_conf_dir            = $dynatraceoneagent::oneagent_puppet_conf_dir
   $oneagent_comms_config_file          = $dynatraceoneagent::oneagent_comms_config_file
@@ -159,16 +159,17 @@ class dynatraceoneagent::config {
       }
     }
 
-    if $infra_only {
+    if $monitoring_mode == 'infra-only' {
       file { $oneagent_infraonly_config_file:
         ensure  => present,
-        content => String($infra_only),
-        notify  => Exec['set_infra_only'],
+        content => 'true',
+        notify  => Exec['set_monitoring_mode'],
         mode    => $global_mode,
       }
     } else {
       file { $oneagent_infraonly_config_file:
         ensure => absent,
+        notify => Exec['set_monitoring_mode'],
       }
     }
 
@@ -296,8 +297,8 @@ class dynatraceoneagent::config {
         refreshonly => true,
     }
 
-    exec { 'set_infra_only':
-      command     => "${oactl} --set-monitoring-mode=infra-only --restart-service",
+    exec { 'set_monitoring_mode':
+      command     => "${oactl} --set-monitoring-mode=${monitoring_mode} --restart-service",
       path        => $oneagentctl_exec_path,
       cwd         => $oneagent_tools_dir,
       timeout     => 6000,

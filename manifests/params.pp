@@ -22,6 +22,7 @@ class dynatraceoneagent::params {
 
     # OneAgent Install Parameters
     $oneagent_params_hash = {
+        '--set-monitoring-mode'        => $monitoring_mode,
         '--set-app-log-content-access' => 'true',
     }
     $reboot_system      = false
@@ -37,7 +38,7 @@ class dynatraceoneagent::params {
     $log_monitoring              = undef
     $log_access                  = undef
     $host_group                  = undef
-    $infra_only                  = false
+    $monitoring_mode             = 'fullstack'
     $network_zone                = undef
 
     if $::osfamily == 'Windows' {
