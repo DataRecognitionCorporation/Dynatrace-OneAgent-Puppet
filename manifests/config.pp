@@ -36,9 +36,6 @@ class dynatraceoneagent::config {
   $oneagent_infraonly_config_file      = $dynatraceoneagent::oneagent_infraonly_config_file
   $oneagent_networkzone_config_file    = $dynatraceoneagent::oneagent_networkzone_config_file
 
-  notice("infra_only: ${infra_only}")
-  notify{"infra_only: ${infra_only}":}
-
   #if ($service_state != 'stopped') {
 
     file { $oneagent_puppet_conf_dir :
