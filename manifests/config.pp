@@ -159,6 +159,7 @@ class dynatraceoneagent::config {
       }
     }
 
+    notice("Setting OneAgent monitoring mode to ${monitoring_mode}"
     if $monitoring_mode == 'infra-only' {
       file { $oneagent_infraonly_config_file:
         ensure  => present,
