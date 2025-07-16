@@ -36,6 +36,9 @@ class dynatraceoneagent::config {
   $oneagent_infraonly_config_file      = $dynatraceoneagent::oneagent_infraonly_config_file
   $oneagent_networkzone_config_file    = $dynatraceoneagent::oneagent_networkzone_config_file
 
+  notice("infra_only: ${infra_only}")
+  notify{"infra_only: ${infra_only}":}
+
   #if ($service_state != 'stopped') {
 
     file { $oneagent_puppet_conf_dir :
@@ -163,6 +166,7 @@ class dynatraceoneagent::config {
       file { $oneagent_infraonly_config_file:
         ensure  => present,
         content => String($infra_only),
+        notify  => Exec['set_infra_only'],
         mode    => $global_mode,
       }
     } else {
@@ -295,16 +299,14 @@ class dynatraceoneagent::config {
         refreshonly => true,
     }
 
-    if $infra_only {
-      exec { 'set_infra_only':
-        command     => "${oactl} --set-monitoring-mode=infra-only --restart-service",
-        path        => $oneagentctl_exec_path,
-        cwd         => $oneagent_tools_dir,
-        timeout     => 6000,
-        provider    => $provider,
-        logoutput   => on_failure,
-        refreshonly => true,
-      }
+    exec { 'set_infra_only':
+      command     => "${oactl} --set-monitoring-mode=infra-only --restart-service",
+      path        => $oneagentctl_exec_path,
+      cwd         => $oneagent_tools_dir,
+      timeout     => 6000,
+      provider    => $provider,
+      logoutput   => on_failure,
+      refreshonly => true,
     }
 
     exec { 'set_network_zone':
