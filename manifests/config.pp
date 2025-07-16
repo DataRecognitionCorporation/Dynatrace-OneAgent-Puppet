@@ -159,17 +159,17 @@ class dynatraceoneagent::config {
       }
     }
 
-    # if $infra_only != undef {
-    #   file { $oneagent_infraonly_config_file:
-    #     ensure  => present,
-    #     content => String($infra_only),
-    #     mode    => $global_mode,
-    #   }
-    # } else {
-    #   file { $oneagent_infraonly_config_file:
-    #     ensure => absent,
-    #   }
-    # }
+    if $infra_only {
+      file { $oneagent_infraonly_config_file:
+        ensure  => present,
+        content => String($infra_only),
+        mode    => $global_mode,
+      }
+    } else {
+      file { $oneagent_infraonly_config_file:
+        ensure => absent,
+      }
+    }
 
     if $network_zone {
       file { $oneagent_networkzone_config_file:
@@ -293,6 +293,18 @@ class dynatraceoneagent::config {
         provider    => $provider,
         logoutput   => on_failure,
         refreshonly => true,
+    }
+
+    if $infra_only {
+      exec { 'set_infra_only':
+        command     => "${oactl} --set-monitoring-mode=infra-only --restart-service",
+        path        => $oneagentctl_exec_path,
+        cwd         => $oneagent_tools_dir,
+        timeout     => 6000,
+        provider    => $provider,
+        logoutput   => on_failure,
+        refreshonly => true,
+      }
     }
 
     exec { 'set_network_zone':

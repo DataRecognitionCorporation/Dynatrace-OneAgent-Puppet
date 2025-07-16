@@ -37,7 +37,7 @@ class dynatraceoneagent::params {
     $log_monitoring              = undef
     $log_access                  = undef
     $host_group                  = undef
-    $infra_only                  = undef
+    $infra_only                  = false
     $network_zone                = undef
 
     if $::osfamily == 'Windows' {
