@@ -19,10 +19,7 @@ class dynatraceoneagent::params {
     $download_cert_link = 'https://ca.dynatrace.com/dt-root.cert.pem'
     $cert_file_name     = 'dt-root.cert.pem'
     $ca_cert_src_path   = "modules/${module_name}/${cert_file_name}"
-    $monitoring_mode    = $monitoring_mode ? {
-        undef   => 'fullstack',
-        default => $monitoring_mode,
-    }
+    $monitoring_mode    = 'fullstack'
 
     # OneAgent Install Parameters
     $oneagent_params_hash = {
