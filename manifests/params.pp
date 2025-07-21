@@ -38,7 +38,10 @@ class dynatraceoneagent::params {
     $log_monitoring              = undef
     $log_access                  = undef
     $host_group                  = undef
-    $monitoring_mode             = 'fullstack'
+    $monitoring_mode             = $monitoring_mode ? {
+        undef   => 'fullstack',
+        default => $monitoring_mode,
+    }
     $network_zone                = undef
 
     if $::osfamily == 'Windows' {
