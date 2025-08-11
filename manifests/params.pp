@@ -19,9 +19,11 @@ class dynatraceoneagent::params {
     $download_cert_link = 'https://ca.dynatrace.com/dt-root.cert.pem'
     $cert_file_name     = 'dt-root.cert.pem'
     $ca_cert_src_path   = "modules/${module_name}/${cert_file_name}"
+    $monitoring_mode    = 'fullstack'
 
     # OneAgent Install Parameters
     $oneagent_params_hash = {
+        '--set-monitoring-mode'        => $monitoring_mode,
         '--set-app-log-content-access' => 'true',
     }
     $reboot_system      = false
@@ -37,7 +39,6 @@ class dynatraceoneagent::params {
     $log_monitoring              = undef
     $log_access                  = undef
     $host_group                  = undef
-    $infra_only                  = undef
     $network_zone                = undef
 
     if $::osfamily == 'Windows' {
