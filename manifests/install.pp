@@ -38,8 +38,7 @@ class dynatraceoneagent::install {
     exec { 'Copy_from_tmp_uninstall':
       command => "cp /tmp/uninstall.sh ${install_dir}/agent/",
       path    => ['/usr/bin', '/bin'],
-      onlyif  => 'test -e /tmp/uninstall.sh',
-      unless  => "test -e ${install_dir}/agent/uninstall.sh",
+      onlyif  => "test -e /tmp/uninstall.sh && ! test -e ${install_dir}/agent/uninstall.sh",
     }
     
     exec { 'install_oneagent':
