@@ -35,6 +35,16 @@ class dynatraceoneagent::install {
       onlyif  => "test -e ${install_dir}/agent/installer.version",
     }
 
+    file { 'Copy_from_tmp_uninstall':
+      ensure  => file,
+      path    => "${install_dir}/agent/uninstall.sh",
+      source  => '/tmp/uninstall.sh',
+      owner   => 'root',
+      group   => 'dtuser',
+      mode    => '0750',
+      replace => false,
+    }
+    
     exec { 'install_oneagent':
       command   => $dynatraceoneagent::command,
       cwd       => $download_dir,
@@ -43,6 +53,19 @@ class dynatraceoneagent::install {
       provider  => $provider,
       logoutput => on_failure,
       unless    => "diff -q ${current_version_file} /tmp/latest_version.txt",
+      require   => File['Copy_from_tmp_uninstall'],
+    }
+
+    # Ensure uninstall script is copied if new install
+    file { 'Copy_uninstall_tmp':
+      path      => '/tmp/uninstall.sh',
+      ensure    => file,
+      source    => "${install_dir}/agent/uninstall.sh",
+      mode      => '0750',
+      owner     => 'root',
+      group     => 'dtuser',
+      replace   => true,
+      subscribe => Exec['install_oneagent'],
     }
   }
 
