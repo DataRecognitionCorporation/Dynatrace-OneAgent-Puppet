@@ -49,7 +49,7 @@ class dynatraceoneagent::install {
       provider  => $provider,
       logoutput => on_failure,
       unless    => "diff -q ${current_version_file} /tmp/latest_version.txt",
-      require   => File['Copy_from_tmp_uninstall'],
+      require   => Exec['Copy_from_tmp_uninstall'],
     }
 
     # Ensure uninstall script is copied if new install
