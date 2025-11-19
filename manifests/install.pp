@@ -35,14 +35,10 @@ class dynatraceoneagent::install {
       onlyif  => "test -e ${install_dir}/agent/installer.version",
     }
 
-    file { 'Copy_from_tmp_uninstall':
-      ensure  => file,
-      path    => "${install_dir}/agent/uninstall.sh",
-      source  => '/tmp/uninstall.sh',
-      owner   => 'root',
-      group   => 'dtuser',
-      mode    => '0750',
-      replace => false,
+    exec { 'Copy_from_tmp_uninstall':
+      command => "cp /tmp/uninstall.sh ${install_dir}/agent/",
+      path    => ['/usr/bin', '/bin'],
+      onlyif  => 'test -e /tmp/uninstall.sh',
     }
     
     exec { 'install_oneagent':
